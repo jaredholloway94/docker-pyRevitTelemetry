@@ -22,3 +22,9 @@ read -p "Enter a password for postgres" pw
 echo $pw > ./secrets/db_password
 docker compose up -d
 ```
+
+
+exposes services at ports on the host:
+- pyrevit-telemetryserver: 8080
+- postgres: 5432
+- metabase: 3000
