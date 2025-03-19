@@ -1,0 +1,65 @@
+services:
+  
+  db:
+    image: postgres:latest
+    container_name: pyRevit-telemetry-db
+    hostname: db
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      - ./db_init:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  telemetry:
+    build: ./telemetry_server
+    container_name: pyrevit-telemetry-server
+    hostname: server
+    ports:
+      - 8080:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - db_password
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: pyrevit-telemetry-web
+    hostname: web
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    ports:
+      - 3000:3000
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: db
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: metabase
+      MB_DB_USER: postgres
+      MB_DB_PASS_FILE: /run/secrets/db_password
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - db_password
+
+
+volumes:
+  db_data:
+    external: true
+
+
+secrets:
+  db_password:
+    file: ./secrets/db_password
+    
