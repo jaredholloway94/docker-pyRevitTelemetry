@@ -8,7 +8,7 @@ git clone https://github.com/jaredholloway94/docker-pyRevitTelemetry.git
 cd docker-pyRevitTelemetry
 mkdir db_data
 mkdir secrets
-Read-Host "Enter a password for postgres" | out-file ./secrets/db_password
+Read-Host "Enter a password for postgres" | Out-File ./secrets/db_password -NoNewline
 docker compose up -d
 ```
 
